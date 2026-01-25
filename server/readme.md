@@ -12,3 +12,15 @@
 6. add below one as well
  "exclude": ["node_modules"],
   "include": ["./src/**/*.ts"]
+
+
+# server setup
+* we setup our basic backend with typescript
+* Now for the first time handsake between two client we have to setup the server, after first time handsake webrtc will take cantrol so for this i will install express and socket.io.
+
+```npm i express socket.io```
+
+refer github : https://github.com/peers/peerjs-server
+install peerjs : $ npm install peer -g
+run command :  peerjs --port 9000 --key peerjs --path /myapp
+
