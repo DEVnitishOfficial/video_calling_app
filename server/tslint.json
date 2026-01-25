@@ -1,0 +1,18 @@
+{
+    "extends" : "tslint:recommended",
+    "defaultSeverity": "error",
+    "rules": {
+        "quotemark": [true, "single", "avoid-escape"],
+        "semicolon": [true, "always"],
+        "trailing-comma": [true, {"multiline": "always", "singleline": "never"}],
+        "no-console": {
+            "severity": "warning",
+            "options": ["log", "debug", "warn", "info", "time", "timeEnd", "trace"]
+        },
+        "object-literal-sort-keys": false,
+        "max-line-length": [true, 120],
+        "interface-name": [true, "never-prefix"],
+        "member-access": [true, "no-public"],
+        "ordered-imports": false
+    }
+}
