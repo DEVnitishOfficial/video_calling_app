@@ -1,120 +1,365 @@
-# setting up typescript
 
-1. npm install -g typescript
-2. npm i -D typescript tslint
-3. tsc --init
-4. uncomment the --->>>  "outDir": "./dist", // here there will be all compiled code from ts to js.
-5. uncomment below one as well
- "noImplicitReturns": true,
-    "noImplicitOverride": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true
-6. add below one as well
- "exclude": ["node_modules"],
-  "include": ["./src/**/*.ts"]
+# 📘 WebRTC + TypeScript Backend — Complete Notes
 
+---
 
-# server setup
-* we setup our basic backend with typescript
-* Now for the first time handsake between two client we have to setup the server, after first time handsake webrtc will take cantrol so for this i will install express and socket.io.
+## 1️⃣ TypeScript Project Setup (Backend)
 
-```npm i express socket.io```
+### Why TypeScript?
 
-refer github : https://github.com/peers/peerjs-server
-install peerjs : $ npm install peer -g
-run command :  peerjs --port 9000 --key peerjs --path /myapp
+* Static typing → fewer runtime bugs
+* Better IDE support (autocomplete, refactor)
+* Industry standard for Node.js backends
 
-# Understanding Internals of webRtc.
+---
 
-* Any application that you see today they are rely on the webrtc internally like zoom, google meet etc. and it's really very good in terms of audio and video call, it is based on UDP.
+### 📦 Installation Steps
 
-* In order to understand the internals of webrtc we must have to understand the NAT(Network address translator)
+```bash
+npm install -g typescript
+npm install -D typescript tslint
+tsc --init
+```
 
-* What is NAT?
-    - As of now we have two standards for ip addresses (i)IPV4 (ii)IPV6
-    - So whenever we connect to internet either we get allocated to IPV4 OR IPV6
-    - IPV6 was build because there were limited number of IP address combination we can made form IPV4.
-    - The number of IPv4 address combinations is limited because they are designed as 32-bit binary numbers, which mathematically restricts the total address space to \(2^{32}\) (roughly 4.3 billion) unique combinations. When this protocol was created, this amount was considered more than enough for the experimental network, and the rapid growth of internet-connected devices was not anticipated.
-    
-* if the ipv4 address is limited then how even today i get the ipv4 address?
-    - if i run ipconfig in my cmd then i got below one how is it possible today as well?
-         Connection-specific DNS Suffix  . :
-   IPv6 Address. . . . . . . . . . . : 2401:4900:a132:96b5:4cf:40c5:b607:30e4
-   Temporary IPv6 Address. . . . . . : 2401:4900:a132:96b5:1d4:461a:eb8a:1eee
-   Link-local IPv6 Address . . . . . : fe80::844a:306a:16d1:3e0c%11
-   IPv4 Address. . . . . . . . . . . : 10.175.173.247
-   Subnet Mask . . . . . . . . . . . : 255.255.255.0
-   Default Gateway . . . . . . . . . : fe80::accc:6ff:fe22:867f%11
-                                       10.175.173.5
+---
 
-* Ans : if you have 10 devices in your home and each one want to connect to the internet then it must connect with the internet and to connect with internet we need a public ip address which is limited.
+### 🛠️ Important `tsconfig.json` Settings
 
-    - so we can ask to my ISP that i need 10 public ip in order to connect with internet.
-    - but this is not how ISP works they can't provide you 10 diff public ip because of limitation.
-    
-    - you said you have 10 devices then you must have a router because in today's you can't hold 10 different simcard for each devices for a sound mind people, so you must have a router.
+```json
+{
+  "outDir": "./dist",
+  "noImplicitReturns": true,
+  "noImplicitOverride": true,
+  "noUnusedLocals": true,
+  "noUnusedParameters": true,
 
-    - So all your 10 devices are depend for internet on router and router is connected with public ip address and router give private ip address to those devices which is connected from the router.
+  "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+```
 
-    - inside the router there is something called NAT(Network address translator).
-    - if someone else in the world want to connect with the my mobile devices then they will not connect to my mobile devices directly rather they will communicate with my router and router send those info to my mobile devices.
+#### What this gives you:
 
-    - in-short we can say that for multiple devices there is only one public ip address that's are connected to the internet and rest have private ip, and using the NAT router make communication easy by mapping private to public ip address.
+* `src/` → TypeScript source
+* `dist/` → compiled JavaScript
+* Strict rules → cleaner production code
 
-* What is static ip?
-    - public and private ip is all about visibility
-    - when we need static vs dynamic ip?
+---
 
-    - suppose there is a server and there are millions of people who want to connect to that server so here the bare minimum criteria is the public ip must not change frequetly, if it changes then they will loose the customer think about flipkart, amazon server.
+## 2️⃣ Server Setup for WebRTC Signaling
 
-    - in case of our router we don't need the static ip becuse no one in the world would like to connect to my router even if i am the owner i don't want that other people use my private router so here in this case dynmic ip is good, meaning everytime i connect with internet we got new ip address.
+### ❓ Why a server if WebRTC is P2P?
 
-    
-    #### Hurdle : webrtc is a peer to peer connection but
-    * 1st hurdle --> two clients or browsers are not directly accessible on the internet because they don't have the public ip address, insted the router has the public ip address.
+Because **peers must first discover each other** and exchange connection details.
 
-    * 2nd hurdle ---> machine connected to router don't know the public ip.
+This first communication is called **signaling**.
 
-    * Now the question come if two machines don't know their ip address then how can they communicate on the internet?
+---
 
-    **Is really webrtc is peer to peer connection**
+### 📦 Required Packages
 
-    * The answer is no, webrtc is not purely peer to peer connection.
-    * And the reason is in order to communicate between two clients we must have to exchange some information.
-    * and this information is called *SDP*(session description protocol) 
-    * SDP contains following things:
-        - it contains the description of multimedia content.
-        - format of multimedia content
-        - encryption
+```bash
+npm install express socket.io
+```
 
-    * suppose there is two client c1 and c2 first the client c1 offer the SDP to client c2 and then when client c2 is ready to accept the audio or video by matching the type of the multimedia content, codex, encryption etc then the c2 accept the offer and answer SDP, this complete process is happening on a server called SIGNILING SERVER.
+* **Express** → HTTP server
+* **Socket.IO** → real-time signaling (SDP, ICE candidates)
 
-    * When the handsake is done then the client c1 send an ICE candidate and when c2 accepts the ICE candidates, a connection is establised between these two clients.
+---
 
-    ## what is ICE candiates?
-    * ICE(Interactive Connectivity Establishment candidate) candiate is a way of communication, that if two clients are not able to communicate directly then using the STUN server then it use the TURN SERVER so, ICE candidate tells us the possible way of communication and which one is the best.
+### 🧠 Signaling Server Responsibilities
 
-    ## Need of STUN server?
-    * From the above discussion we understood that the two devices don't know public ip address they know their private ip but for communication on internet we must have the public ip address, but two independent machine in two corner of the world don't know each other ip address then how it will know each other ip address and who will tell them each other ip address.
+* Exchange **SDP offer/answer**
+* Exchange **ICE candidates**
+* DOES NOT handle audio/video data
 
-    *Real life example*
-    * Suppose there is two friend A & B, in the childhood they don't have their own phone so whenever friend A want to talk to friend B then friend A call to friend B father and their father give phone to his children and then these two freinds talk with each other, so here our machine is responsible to tell their public ip address to other device but how?
+---
 
-    * here comes into the picture of STUN server.
-    * STUN : Session Traversal Utilities for NAT
-    * STUN server allow a machine to find their public ip address.
-    * So suppose you have client c1 and connected with internet by router so our client C1 will make request to the STUN server which will go through the server and the STUN server will return the public ipv4 address with port.
+## 3️⃣ PeerJS (Optional Helper Layer)
 
-    * There can be 5% chances in which due to firewall or some other network configuration direct communication between two client is not possible.
+PeerJS simplifies WebRTC by abstracting:
 
-    * to solve this problem we need one more intermediary layer to relay the information, and this is the place where TURN server come into the picture.
+* SDP handling
+* ICE handling
+* Peer discovery
 
-    ## TURN SERVER(Traversal Using Relays around NAT)
-    ![alt text](image.png)
+```bash
+npm install peer -g
+peerjs --port 9000 --key peerjs --path /myapp
+```
 
-    * the main work of TURN server is to by pass the firwall and communicate with each other on internet, for better understanding see the image, visualise this like if two enemy are not able to solve their problem by themselves then they go to the third person which listen to both person and solve the problem.
+👉 Internally it still uses:
 
-    * TURN server is extension of stun server, so the TURN server can do both things.
+* WebRTC
+* STUN/TURN
+* ICE candidates
 
+---
 
+## 4️⃣ What Is WebRTC?
 
+### 🔹 Definition
+
+**WebRTC (Web Real-Time Communication)** enables:
+
+* Audio calls
+* Video calls
+* Data transfer
+  directly between browsers using **UDP**
+
+---
+
+### 🔹 Why UDP?
+
+* Low latency
+* Packet loss is acceptable for video/audio
+* Faster than TCP
+
+---
+
+## 5️⃣ IP Address Basics (IPv4 vs IPv6)
+
+### IPv4
+
+* 32-bit address → `2^32 ≈ 4.3 billion`
+* Example: `192.168.1.1`
+* **Limited & exhausted**
+
+### IPv6
+
+* 128-bit address
+* Example:
+
+  ```
+  2401:4900:a132:96b5:4cf:40c5:b607:30e4
+  ```
+* Practically unlimited
+
+---
+
+## 6️⃣ Why You Still Get an IPv4 Address Today
+
+From `ipconfig`:
+
+```
+IPv4 Address: 10.175.173.247
+```
+
+### 🔑 Key Insight
+
+This is a **PRIVATE IP**, not a public one.
+
+---
+
+## 7️⃣ NAT (Network Address Translation)
+
+### 🔹 What NAT Does
+
+* Router has **1 public IP**
+* Devices get **private IPs**
+* Router maps:
+
+  ```
+  Private IP + Port ↔ Public IP + Port
+  ```
+
+![Image](https://www.watchguard.com/help/docs/help-center/en-us/Content/en-US/Fireware/configuration_examples/images/NAT_email_topology.jpg)
+
+![Image](https://www.researchgate.net/publication/320322146/figure/fig1/AS%3A548239512018944%401507721893582/Typical-configuration-of-a-home-network-using-NAT.png)
+
+---
+
+### Example
+
+| Device | Private IP  |
+| ------ | ----------- |
+| Phone  | 192.168.1.2 |
+| Laptop | 192.168.1.3 |
+
+Router:
+
+```
+Public IP → 103.xx.xx.xx
+```
+
+---
+
+## 8️⃣ Static IP vs Dynamic IP
+
+### Static IP
+
+* Fixed
+* Needed for servers (Amazon, Flipkart)
+* Always reachable
+
+### Dynamic IP
+
+* Changes over time
+* Used by home routers
+* Cheaper & safer
+
+---
+
+## 9️⃣ WebRTC Connection Hurdles
+
+### ❌ Problem 1
+
+Clients **don’t have public IPs**
+
+### ❌ Problem 2
+
+Clients **don’t know their own public IP**
+
+---
+
+## 🔥 Important Truth
+
+> **WebRTC is NOT purely peer-to-peer**
+
+It needs **servers to establish the connection first**.
+
+---
+
+## 🔄 WebRTC Connection Flow (Big Picture)
+
+![Image](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Connectivity/webrtc-complete-diagram.png)
+
+![Image](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Protocols/webrtc-turn.png)
+
+---
+
+## 1️⃣0️⃣ SDP (Session Description Protocol)
+
+### What SDP Contains
+
+* Media type (audio/video)
+* Codec (VP8, VP9, H264)
+* Encryption keys
+* Transport info
+
+---
+
+### SDP Flow
+
+```
+Client A → Offer SDP → Signaling Server
+Client B → Answer SDP → Signaling Server
+```
+
+Only **after this**, real communication starts.
+
+---
+
+## 1️⃣1️⃣ ICE Candidates
+
+### ICE = Interactive Connectivity Establishment
+
+ICE candidate = **possible way to connect**
+
+* Local IP
+* Public IP
+* TURN relay
+
+ICE tries:
+
+1. Direct connection
+2. STUN-assisted
+3. TURN relay (last resort)
+
+---
+
+## 1️⃣2️⃣ STUN Server (Public IP Discovery)
+
+### Role
+
+* Tells client:
+
+  ```
+  “Hey, the world sees you as 103.xx.xx.xx:54321”
+  ```
+
+### Analogy
+
+> Calling your friend’s father to ask if your friend is home
+
+![Image](https://community.cisco.com/t5/image/serverpage/image-id/175445iD859CC44A9012A49?v=v2)
+
+![Image](https://www.metered.ca/tools/openrelay/assets/images/stun-server-66d31b216429fa6075c338ffa3eaa39b.png)
+
+---
+
+## 1️⃣3️⃣ TURN Server (Firewall Bypass)
+
+### When TURN Is Needed
+
+* Strict NAT
+* Firewall blocks UDP
+* Corporate networks
+
+### What TURN Does
+
+* Acts as **relay**
+* Media flows through TURN
+
+⚠️ Slower + expensive (bandwidth cost)
+
+![Image](https://miro.medium.com/max/1400/1%2Ak9ARIJ9Jfkscjji1SNQ4ig.jpeg)
+
+![Image](https://storage.googleapis.com/100ms-cms-prod/cms/turn_server_usage_6868821b66/turn_server_usage_6868821b66.jpg)
+
+---
+
+## 1️⃣4️⃣ WebRTC Success Rate
+
+| Method | Success |
+| ------ | ------- |
+| Direct | ~70%    |
+| STUN   | ~25%    |
+| TURN   | ~5%     |
+
+---
+
+## 1️⃣5️⃣ Group Calls Problem
+
+### Mesh Topology (❌ Bad)
+
+* Each peer connects to every peer
+* Bandwidth explodes
+
+```
+5 users → 10 connections
+```
+
+---
+
+## 1️⃣6️⃣ SFU (Selective Forwarding Unit) ✅
+
+### How SFU Works
+
+* All clients send stream → SFU
+* SFU forwards streams to others
+* No re-encoding
+
+![Image](https://media2.dev.to/cdn-cgi/image/width%3D800%2Cheight%3D%2Cfit%3Dscale-down%2Cgravity%3Dauto%2Cformat%3Dauto/https%3A%2F%2Fdev-to-uploads.s3.amazonaws.com%2Fuploads%2Farticles%2Fgh7d4263pexj9v8tbih0.png)
+
+![Image](https://i.sstatic.net/ECNOM.png)
+
+---
+
+### Why SFU Is Best
+
+* Scales well
+* Lower CPU
+* Used by:
+
+  * Google Meet
+  * Zoom
+  * Webex
+
+---
+
+## 🔚 Final Mental Model (One Line)
+
+> **WebRTC = P2P media + Server-assisted connection + NAT traversal magic**
+
+---
