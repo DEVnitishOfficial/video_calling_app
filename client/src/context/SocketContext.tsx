@@ -3,9 +3,12 @@ import { createContext } from "react";
 
 const WEBSOCKET_SERVER = "http://localhost:5500";
 
-const SocketContext = createContext<any | null>(null);
+export const SocketContext = createContext<any | null>(null);
 
-const socket = SocketIoClient(WEBSOCKET_SERVER);
+const socket = SocketIoClient(WEBSOCKET_SERVER,{
+    withCredentials: false,
+    transports : ["pooling", "websocket"]
+});
 
 interface Props {
     children : React.ReactNode
