@@ -21,9 +21,9 @@ const roomHandler = (socket: Socket) => {
         console.log("room created with id", roomId)
     }
 
-    const joinRoom = ({roomId} : {roomId: string}) => {
+    const joinRoom = ({roomId, peerId} : {roomId: string, peerId: string}) => {
         socket.join(roomId);
-        console.log("New user joined room with id", roomId)
+        console.log(`New user joined room with id ${roomId} and peerId is ${peerId}`)
     }
 
 

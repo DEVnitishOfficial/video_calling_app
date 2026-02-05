@@ -17,9 +17,9 @@ const roomHandler = (socket) => {
         socket.emit("room-created", { roomId }); // from backend side we emit a event that a room is created and send the roomId.
         console.log("room created with id", roomId);
     };
-    const joinRoom = ({ roomId }) => {
+    const joinRoom = ({ roomId, peerId }) => {
         socket.join(roomId);
-        console.log("New user joined room with id", roomId);
+        console.log(`New user joined room with id ${roomId} and peerId is ${peerId}`);
     };
     // when to call the above two functions 
     // we will call the above two function when the client will emit an event to create and join the room.
