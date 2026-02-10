@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Peer from "peerjs"
 import { v4 as uuidv4 } from 'uuid';
 
+
 const WEBSOCKET_SERVER = "http://localhost:5500";
 
 export const SocketContext = createContext<any | null>(null);
@@ -19,6 +20,7 @@ interface Props {
 
 export const SocketProvider: React.FC<Props> = ({ children }) => {
 
+
     const navigate = useNavigate();
 
     // state variable to store the userId
@@ -32,10 +34,12 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
         console.log('see your newPeer', newPeer)
 
         setUser(newPeer)
+
         const enterRoom = ({ roomId }: { roomId: string }) => {
             navigate(`/room/${roomId}`);
         }
         socket.on("room-created", enterRoom);
+        
     }, [])
 
     return (
