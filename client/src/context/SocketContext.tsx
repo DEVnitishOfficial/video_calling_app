@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const WEBSOCKET_SERVER = "http://localhost:5500";
 
-export const SocketContext = createContext<any | null>(null);
+ const SocketContext = createContext<any | null>(null);
 
 const socket = SocketIoClient(WEBSOCKET_SERVER, {
     withCredentials: false,
@@ -18,13 +18,20 @@ interface Props {
     children: React.ReactNode
 }
 
-export const SocketProvider: React.FC<Props> = ({ children }) => {
+ const SocketProvider: React.FC<Props> = ({ children }) => {
 
 
     const navigate = useNavigate();
 
     // state variable to store the userId
     const [user, setUser] = useState<Peer>()
+    const [stream, setStream] = useState<MediaStream>()
+
+
+    const fetchUserFeed = async() => {
+      const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+      setStream(stream);
+    }
 
     useEffect(() => {
 
@@ -33,7 +40,9 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
 
         console.log('see your newPeer', newPeer)
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser(newPeer)
+        fetchUserFeed();
 
         const enterRoom = ({ roomId }: { roomId: string }) => {
             navigate(`/room/${roomId}`);
@@ -43,8 +52,10 @@ export const SocketProvider: React.FC<Props> = ({ children }) => {
     }, [])
 
     return (
-        <SocketContext.Provider value={{ socket, user }}>
+        <SocketContext.Provider value={{ socket, user, stream }}>
             {children}
         </SocketContext.Provider>
     )
 }
+
+export { SocketContext, SocketProvider }

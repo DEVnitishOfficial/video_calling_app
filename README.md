@@ -272,3 +272,8 @@ Client A              Signaling Server              Client B
 * TURN is fallback, not default
 * Media does **not** flow through your backend
 
+
+## Now our next feature will be take feedback from the user.
+
+
+
